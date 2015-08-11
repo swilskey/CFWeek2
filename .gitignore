@@ -1,6 +1,6 @@
 # Xcode
 #
-Keys.swift
+*/Keys.swift
 build/
 *.pbxuser
 !default.pbxuser
