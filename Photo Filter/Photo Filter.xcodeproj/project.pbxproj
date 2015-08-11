@@ -29,6 +29,7 @@
 		22AA30561B79198F00D54982 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22AA304D1B79198F00D54982 /* StoreKit.framework */; };
 		22AA30571B79198F00D54982 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22AA304E1B79198F00D54982 /* SystemConfiguration.framework */; };
 		22D6F1361B7A81640038F808 /* FilterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22D6F1351B7A81640038F808 /* FilterService.swift */; };
+		22F9C9F11B7AA2B5005F3479 /* Keys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F9C9F01B7AA2B5005F3479 /* Keys.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +69,7 @@
 		22AA304D1B79198F00D54982 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		22AA304E1B79198F00D54982 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		22D6F1351B7A81640038F808 /* FilterService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterService.swift; sourceTree = "<group>"; };
+		22F9C9F01B7AA2B5005F3479 /* Keys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Keys.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +127,7 @@
 		22AA30161B79185900D54982 /* Photo Filter */ = {
 			isa = PBXGroup;
 			children = (
+				22F9C9EF1B7AA2A4005F3479 /* Constants */,
 				22AA30191B79185900D54982 /* AppDelegate.swift */,
 				22AA305A1B791A3000D54982 /* Models */,
 				22AA30581B791A1E00D54982 /* Controllers */,
@@ -205,6 +208,14 @@
 				22D6F1351B7A81640038F808 /* FilterService.swift */,
 			);
 			name = Models;
+			sourceTree = "<group>";
+		};
+		22F9C9EF1B7AA2A4005F3479 /* Constants */ = {
+			isa = PBXGroup;
+			children = (
+				22F9C9F01B7AA2B5005F3479 /* Keys.swift */,
+			);
+			name = Constants;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -308,6 +319,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				22D6F1361B7A81640038F808 /* FilterService.swift in Sources */,
+				22F9C9F11B7AA2B5005F3479 /* Keys.swift in Sources */,
 				22AA301C1B79185900D54982 /* ViewController.swift in Sources */,
 				22AA301A1B79185900D54982 /* AppDelegate.swift in Sources */,
 			);
