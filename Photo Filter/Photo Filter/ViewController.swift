@@ -33,24 +33,25 @@ class ViewController: UIViewController {
     }
     
     let sepiaAction = UIAlertAction(title: "Sepia Filter", style: .Default) { (alert) -> Void in
-      let image = CIImage(image: self.imageView.image)
-      let filter = CIFilter(name: "CISepiaTone")
-      filter.setValue(image, forKey: kCIInputImageKey)
-      
-      let options = [kCIContextWorkingColorSpace : NSNull()]
-      let eaglContext = EAGLContext(API: EAGLRenderingAPI.OpenGLES2)
-      let gpuContext = CIContext(EAGLContext: eaglContext, options: options)
-      
-      let outputImage = filter.outputImage
-      let extent = outputImage.extent()
-      let cgImage = gpuContext.createCGImage(outputImage, fromRect: extent)
-      let finalImage = UIImage(CGImage: cgImage)
+      let finalImage = FilterService.filter("CISepiaTone", image: self.imageView.image!)
+      self.imageView.image = finalImage
+    }
+    
+    let pixellateAction = UIAlertAction(title: "Pixellate Filter", style: .Default) { (alert) -> Void in
+      let finalImage = FilterService.filter("CIPixellate", image: self.imageView.image!)
+      self.imageView.image = finalImage
+    }
+    
+    let invertAction = UIAlertAction(title: "Invert Filter", style: .Default) { (alert) -> Void in
+      let finalImage = FilterService.filter("CIColorInvert", image: self.imageView.image!)
       self.imageView.image = finalImage
     }
     
     actionController.addAction(galleryAction)
     actionController.addAction(photoAction)
     actionController.addAction(sepiaAction)
+    actionController.addAction(pixellateAction)
+    actionController.addAction(invertAction)
     actionController.addAction(cancelAction)
   }
 
