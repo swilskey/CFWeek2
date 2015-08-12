@@ -9,6 +9,7 @@
 import UIKit
 
 class FilterService {
+
   
   class func filter(filterName: String, image: UIImage) -> UIImage? {
     
