@@ -1,8 +1,8 @@
 //
-//  TimelineViewController.swift
+//  GalleryViewController.swift
 //  Photo Filter
 //
-//  Created by Sam Wilskey on 8/11/15.
+//  Created by Sam Wilskey on 8/13/15.
 //  Copyright (c) 2015 Wilskey Labs. All rights reserved.
 //
 
@@ -10,14 +10,17 @@ import UIKit
 import Bolts
 import Parse
 
-class TimelineViewController: UIViewController {
-  @IBOutlet weak var tableView: UITableView!
+class GalleryViewController: UIViewController {
+  @IBOutlet weak var galleryCollectionView: UICollectionView!
   
-  var posts:[PFObject] = [PFObject]()
+  
+  var posts = [PFObject]()
   var imageCache = [String: UIImage]()
   
-  override func viewWillAppear(animated: Bool) {
-    super.viewWillAppear(animated)
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    navigationController?.navigationBarHidden = false
+    galleryCollectionView.dataSource = self
     
     let query = PFQuery(className: "Post")
     
@@ -27,45 +30,37 @@ class TimelineViewController: UIViewController {
       } else if let posts = results as? [PFObject] {
         NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
           self.posts = posts
-          self.tableView.reloadData()
+          println(posts.count)
+          self.galleryCollectionView.reloadData()
         })
       }
     }
-
-  }
-  
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    
-    tableView.dataSource = self
-    tableView.registerNib(UINib(nibName: "TimelineCell", bundle: NSBundle.mainBundle()), forCellReuseIdentifier: "TimelineCell")
+    // Do any additional setup after loading the view.
   }
   
   override func didReceiveMemoryWarning() {
     super.didReceiveMemoryWarning()
+    // Dispose of any resources that can be recreated.
   }
+  
 }
 
-extension TimelineViewController: UITableViewDataSource {
-  func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+extension GalleryViewController: UICollectionViewDataSource {
+  
+  func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    let cell = collectionView.dequeueReusableCellWithReuseIdentifier("ImageCell", forIndexPath: indexPath) as! GalleryCell
     
-    let cell = tableView.dequeueReusableCellWithIdentifier("TimelineCell", forIndexPath: indexPath) as! TimelineCell
     cell.tag++
     
     let tag = cell.tag
-
+    
     if let post = posts[indexPath.item] as PFObject!,
       imageFile = post["image"] as? PFFile,
       objectID = post.objectId {
-        if let comment = post["comment"] as? String {
-          cell.messageLabel.text = comment
-        } else {
-          cell.messageLabel.text = "No Comment"
-        }
         if imageCache[objectID] != nil {
           println("From Cache")
           if cell.tag == tag {
-            cell.parseImagePreview.image = imageCache[objectID]
+            cell.galleryImage.image = imageCache[objectID]
           }
         } else {
           imageFile.getDataInBackgroundWithBlock({ (data, error) -> Void in
@@ -73,26 +68,22 @@ extension TimelineViewController: UITableViewDataSource {
               println(error.localizedDescription)
             } else if let data = data,
               image = UIImage(data: data) {
-                let finalImage = ImageResizer.resizeImage(image, size: CGSize(width: 200, height: 200))
                 NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+                  let finalImage = ImageResizer.resizeImage(image, size: CGSize(width: 400, height: 400))
                   if cell.tag == tag {
-                    self.imageCache[objectID] = finalImage
-                    cell.parseImagePreview.image = finalImage
+                    self.imageCache[objectID] = image
+                    cell.galleryImage.image = image
                   }
                 })
             }
           })
         }
     }
-    
+
     return cell
   }
   
-  func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+  func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return posts.count
   }
-}
-
-extension TimelineViewController: UITableViewDelegate {
-  
 }

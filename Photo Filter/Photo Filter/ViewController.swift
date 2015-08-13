@@ -11,29 +11,39 @@ import Bolts
 import Parse
 
 class ViewController: UIViewController {
+  
+  let kContainerViewBottomPhonePadding: CGFloat = -150
+  let kThumbnailImageSize: CGSize = CGSize(width: 200, height: 200)
+  let kDefaultAnimationLength: NSTimeInterval = 0.3
+  
   @IBOutlet weak var imageView: UIImageView!
   @IBOutlet weak var optionButton: UIButton!
   @IBOutlet weak var collectionView: UICollectionView!
   @IBOutlet weak var collectionVerticalSpace: NSLayoutConstraint!
   
-  let filters = ["CISepiaTone", "CIPixellate", "CIColorInvert"]
-  var thumbnail: UIImage?
+  let gpuContext = CIContext(EAGLContext: EAGLContext(API: EAGLRenderingAPI.OpenGLES2), options: [kCIContextWorkingColorSpace : NSNull()])
   
-  var currentImage: UIImage? {
+  var filters: [(UIImage, CIContext)-> (UIImage)] = [FilterService.sepiaImageFromOriginalImage, FilterService.pixellateImageFromOriginalImage,
+    FilterService.monoImageFromOriginalImage, FilterService.invertImageFromOriginalImage, FilterService.photoEffectFromOriginalImage]
+  
+  var thumbnail: UIImage?
+  var commentTextField: UITextField?
+  var displayImage: UIImage? {
     didSet {
-      imageView.image = currentImage
-      thumbnail = ImageResizer.resizeImage(currentImage!, size: CGSize(width: 100, height: 100))
+      imageView.image = displayImage
+      thumbnail = ImageResizer.resizeImage(displayImage!, size: kThumbnailImageSize)
       filterMode()
       collectionView.reloadData()
     }
   }
   
   let actionController = UIAlertController(title: "Filter Options", message: "Select a Image or a Filter", preferredStyle: UIAlertControllerStyle.ActionSheet)
-  
+  let commentAlert = UIAlertController(title: "Comment", message: nil, preferredStyle: UIAlertControllerStyle.Alert)
   let picker = UIImagePickerController()
   
   override func viewDidLoad() {
     super.viewDidLoad()
+    
     picker.delegate = self
     collectionView.dataSource = self
     collectionView.delegate = self
@@ -42,7 +52,7 @@ class ViewController: UIViewController {
       
     }
     
-    let galleryAction = UIAlertAction(title: "Gallery", style: .Default) { (alert) -> Void in
+    let photoLibraryAction = UIAlertAction(title: "Photo Library", style: .Default) { (alert) -> Void in
       self.picker.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
       self.presentViewController(self.picker, animated: true, completion: nil)
     }
@@ -50,6 +60,38 @@ class ViewController: UIViewController {
     let photoAction = UIAlertAction(title: "Camera", style: .Default) { (alert) -> Void in
       self.picker.sourceType = UIImagePickerControllerSourceType.Camera
       self.presentViewController(self.picker, animated: true, completion: nil)
+    }
+    
+    let commentAction = UIAlertAction(title: "Ok", style: .Default) { (alert) in
+      self.commentTextField = self.commentAlert.textFields![0] as? UITextField
+      let post = PFObject(className: "Post")
+      
+      if let image = self.imageView.image,
+        data = UIImageJPEGRepresentation(image, 1.0) {
+          let file = PFFile(name: "image.jpeg" ,data: data)
+          post["image"] = file
+          post["comment"] = self.commentTextField?.text
+      }
+      post.saveInBackgroundWithBlock({ (success, error) -> Void in
+        
+      })
+    }
+    commentAction.enabled = false
+    
+    commentAlert.addTextFieldWithConfigurationHandler { (textField) in
+      textField.placeholder = "Comment"
+      
+      NSNotificationCenter.defaultCenter().addObserverForName(UITextFieldTextDidChangeNotification, object: textField, queue: NSOperationQueue.mainQueue()) { (notification) in
+        commentAction.enabled = textField.text != ""
+      }
+    }
+    
+    let uploadAction = UIAlertAction(title: "Upload", style: .Default) { (alert) -> Void in
+      self.presentViewController(self.commentAlert, animated: true, completion: nil)
+    }
+    
+    let galleryAction = UIAlertAction(title: "Gallery", style: .Default) { (alert) -> Void in
+      self.performSegueWithIdentifier("GallerySegue", sender: self)
     }
     
     if UIDevice.currentDevice().userInterfaceIdiom == UIUserInterfaceIdiom.Phone {
@@ -60,23 +102,15 @@ class ViewController: UIViewController {
       actionController.addAction(filterAction)
     }
     
-    let uploadAction = UIAlertAction(title: "Upload", style: .Default) { (alert) -> Void in
-      let post = PFObject(className: "Post")
-      
-      if let image = self.imageView.image,
-      data = UIImageJPEGRepresentation(image, 1.0) {
-        let file = PFFile(name: "image.jpeg" ,data: data)
-        post["image"] = file
-      }
-      post.saveInBackgroundWithBlock({ (success, error) -> Void in
-        
-      })
-    }
 
-    actionController.addAction(galleryAction)
+    actionController.addAction(photoLibraryAction)
     actionController.addAction(photoAction)
     actionController.addAction(uploadAction)
+    actionController.addAction(galleryAction)
     actionController.addAction(cancelAction)
+    
+    commentAlert.addAction(commentAction)
+    commentAlert.addAction(cancelAction)
   }
   
   override func didReceiveMemoryWarning() {
@@ -93,8 +127,7 @@ class ViewController: UIViewController {
   }
   
   func filterMode() {
-    UIView.animateWithDuration(0.3, animations: { () -> Void in
-      
+    UIView.animateWithDuration(kDefaultAnimationLength, animations: { () -> Void in
       self.collectionVerticalSpace.constant = 8
       let doneButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Done, target: self, action: "doneMethod")
       let cancelButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Cancel, target: self, action: "cancelMethod")
@@ -107,8 +140,8 @@ class ViewController: UIViewController {
   }
   
   func doneMethod() {
-    UIView.animateWithDuration(0.3, animations: { () -> Void in
-      self.collectionVerticalSpace.constant = -150
+    UIView.animateWithDuration(kDefaultAnimationLength, animations: { () -> Void in
+      self.collectionVerticalSpace.constant = self.kContainerViewBottomPhonePadding
       self.navigationController?.navigationBarHidden = true
       self.optionButton.hidden = false
       self.view.layoutIfNeeded()
@@ -116,21 +149,25 @@ class ViewController: UIViewController {
   }
   
   func cancelMethod() {
-    UIView.animateWithDuration(0.3, animations: { () -> Void in
-      self.imageView.image = self.currentImage
-      self.collectionVerticalSpace.constant = -150
+    UIView.animateWithDuration(kDefaultAnimationLength, animations: { () -> Void in
+      self.imageView.image = self.displayImage
+      self.collectionVerticalSpace.constant = self.kContainerViewBottomPhonePadding
       self.navigationController?.navigationBarHidden = true
       self.optionButton.hidden = false
       self.view.layoutIfNeeded()
       
     })
   }
+  
+  override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    let destination = segue.destinationViewController as! GalleryViewController
+  }
 }
 
 extension ViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
   func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject : AnyObject]) {
     let image = info[UIImagePickerControllerOriginalImage] as? UIImage
-    self.currentImage = image!
+    self.displayImage = image!
     self.picker.dismissViewControllerAnimated(true, completion: nil)
   }
   
@@ -141,9 +178,11 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
 
 extension ViewController: UICollectionViewDataSource {
   func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-    let cell = collectionView.dequeueReusableCellWithReuseIdentifier("ImageCell", forIndexPath: indexPath) as! ImageCell
+    let cell = collectionView.dequeueReusableCellWithReuseIdentifier("FilterCell", forIndexPath: indexPath) as! ImageCell
     if let image = thumbnail {
-      cell.thumbnailView.image = FilterService.filter(filters[indexPath.item], image: image)
+      let filter = filters[indexPath.item]
+      
+      cell.thumbnailView.image = filter(image, self.gpuContext)
     }
     return cell
   }
@@ -155,8 +194,9 @@ extension ViewController: UICollectionViewDataSource {
 
 extension ViewController: UICollectionViewDelegate {
   func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-    if let image = self.currentImage {
-      let finalImage = FilterService.filter(filters[indexPath.item], image: image)
+    if let image = self.displayImage {
+      let filter = filters[indexPath.item]
+      let finalImage = filter(image, self.gpuContext)
       self.imageView.image = finalImage
     }
   }
