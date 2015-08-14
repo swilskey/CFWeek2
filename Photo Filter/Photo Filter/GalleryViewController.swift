@@ -14,21 +14,47 @@ protocol ImageSelectedDelegate: class {
 }
 
 class GalleryViewController: UIViewController {
+  
   @IBOutlet weak var galleryCollectionView: UICollectionView!
   
-  weak var delegate: ImageSelectedDelegate?
+  let backgroundQueue = NSOperationQueue()
+  let cellThumbnailSize = CGSize(width:100, height: 100)
   
+  weak var delegate: ImageSelectedDelegate?
   var fetchResult: PHFetchResult!
   var desiredFinalImageSize : CGSize!
-  let cellThumbnailSize = CGSize(width:100, height: 100)
+  var startingScale: CGFloat = 0
+  var scale: CGFloat = 0
+  
+  
   
   override func viewDidLoad() {
     super.viewDidLoad()
+    
     galleryCollectionView.dataSource = self
     galleryCollectionView.delegate = self
     navigationController?.navigationBarHidden = false
     fetchResult = PHAsset.fetchAssetsWithMediaType(PHAssetMediaType.Image, options: nil)
     
+    var pinchAction = UIPinchGestureRecognizer(target: self, action: "pinchRecognized:")
+    galleryCollectionView.addGestureRecognizer(pinchAction)
+  }
+  
+  func pinchRecognized(pinch: UIPinchGestureRecognizer) {
+    if pinch.state == UIGestureRecognizerState.Began {
+      startingScale = pinch.scale
+    }
+    
+    if pinch.state == UIGestureRecognizerState.Ended {
+      scale = startingScale * pinch.scale
+      let layout = galleryCollectionView.collectionViewLayout as! UICollectionViewFlowLayout
+      let newSize = CGSize(width: layout.itemSize.width * scale, height: layout.itemSize.height * scale)
+      
+      galleryCollectionView.performBatchUpdates({ () -> Void in
+        layout.itemSize = newSize
+        layout.invalidateLayout()
+        }, completion: nil )
+    }
   }
   
   override func didReceiveMemoryWarning() {
@@ -57,13 +83,12 @@ extension GalleryViewController: UICollectionViewDelegate {
   func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
     let options = PHImageRequestOptions()
     options.synchronous = true
-    let backgroundQueue = NSOperationQueue()
+
     backgroundQueue.addOperationWithBlock { () -> Void in
       if let asset = self.fetchResult[indexPath.row] as? PHAsset {
         PHCachingImageManager.defaultManager().requestImageForAsset(asset, targetSize: self.desiredFinalImageSize, contentMode: PHImageContentMode.AspectFill, options: options) { (image, info) -> Void in
           
           if let image = image {
-
             NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
               self.delegate?.controllerDidSelectImage(image)              
               self.navigationController?.popViewControllerAnimated(true)

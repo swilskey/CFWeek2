@@ -25,21 +25,22 @@ class ViewController: UIViewController {
   @IBOutlet weak var collectionVerticalSpace: NSLayoutConstraint!
   
   var imageCache = [String: UIImage]()
-  let gpuContext = CIContext(EAGLContext: EAGLContext(API: EAGLRenderingAPI.OpenGLES2), options: [kCIContextWorkingColorSpace : NSNull()])
-  
-  var filters: [(UIImage, CIContext)-> (UIImage)] = [FilterService.sepiaImageFromOriginalImage, FilterService.pixellateImageFromOriginalImage,
-    FilterService.monoImageFromOriginalImage, FilterService.invertImageFromOriginalImage, FilterService.photoEffectFromOriginalImage]
-  
   var thumbnail: UIImage?
   var commentTextField: UITextField?
   var displayImage: UIImage? {
     didSet {
+      imageCache.removeAll(keepCapacity: false)
       imageView.image = displayImage
       thumbnail = ImageResizer.resizeImage(displayImage!, size: kThumbnailImageSize)
       filterMode()
       collectionView.reloadData()
     }
   }
+  
+  let gpuContext = CIContext(EAGLContext: EAGLContext(API: EAGLRenderingAPI.OpenGLES2), options: [kCIContextWorkingColorSpace : NSNull()])
+  let filterQueue = NSOperationQueue()
+  let filters: [(UIImage, CIContext)-> (UIImage)] = [FilterService.sepiaImageFromOriginalImage, FilterService.pixellateImageFromOriginalImage,
+    FilterService.monoImageFromOriginalImage, FilterService.invertImageFromOriginalImage, FilterService.photoEffectFromOriginalImage]
   
   let actionController = UIAlertController(title: "Filter Options", message: "Select a Image or a Filter", preferredStyle: UIAlertControllerStyle.ActionSheet)
   let commentAlert = UIAlertController(title: "Comment", message: nil, preferredStyle: UIAlertControllerStyle.Alert)
@@ -106,7 +107,7 @@ class ViewController: UIViewController {
       actionController.addAction(filterAction)
     }
     
-
+    
     actionController.addAction(photoLibraryAction)
     actionController.addAction(photoAction)
     actionController.addAction(uploadAction)
@@ -202,11 +203,16 @@ extension ViewController: UICollectionViewDataSource {
       return cell
     }
     
-    if let image = thumbnail {
-      let filter = filters[indexPath.item]
-      let filteredImage = filter(image, self.gpuContext)
-      self.imageCache[String(indexPath.item)] = filteredImage
-      cell.thumbnailView.image = filter(image, self.gpuContext)
+    filterQueue.addOperationWithBlock { () -> Void in
+      
+      if let image = self.thumbnail {
+        let filter = self.filters[indexPath.item]
+        let filteredImage = filter(image, self.gpuContext)
+        self.imageCache[String(indexPath.item)] = filteredImage
+        NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+          cell.thumbnailView.image = filteredImage
+        })
+      }
     }
     return cell
   }

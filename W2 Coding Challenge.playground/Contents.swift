@@ -48,7 +48,6 @@ func fib(number: Double) -> Double {
   if number < 2 {
     return number
   }
-  println(number)
   return fib(number - 1) + fib(number - 2)
 }
 // Tail Recursive
@@ -61,3 +60,25 @@ func fib2(term: Double, val: Double, prev: Double) -> Double {
 
 println(fib2(100, 1, 0))
 println(fib(10))
+
+/*
+* Wednesday
+* Check if string is a Palindrome
+*
+*/
+
+func isPalindrome(string: String) -> Bool {
+  var reverse = ""
+  for scaler in string.unicodeScalars {
+    var char = "\(scaler)"
+    reverse = char + reverse
+  }
+  
+  return string == reverse
+}
+
+let testStringA = "abcba"
+let testStringB = "asdfa"
+
+println(isPalindrome(testStringA))
+println(isPalindrome(testStringB))

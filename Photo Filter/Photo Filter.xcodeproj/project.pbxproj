@@ -139,11 +139,11 @@
 		22AA30161B79185900D54982 /* Photo Filter */ = {
 			isa = PBXGroup;
 			children = (
-				22F9C9F21B7AA5A9005F3479 /* Constatns */,
 				22AA30191B79185900D54982 /* AppDelegate.swift */,
 				22AA305A1B791A3000D54982 /* Models */,
 				22AA30581B791A1E00D54982 /* Controllers */,
 				22AA30591B791A2600D54982 /* Views */,
+				22F9C9F21B7AA5A9005F3479 /* Constatns */,
 				22AA30171B79185900D54982 /* Supporting Files */,
 			);
 			path = "Photo Filter";
