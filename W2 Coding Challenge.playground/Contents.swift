@@ -62,7 +62,7 @@ println(fib2(100, 1, 0))
 println(fib(10))
 
 /*
-* Wednesday
+* Thursday
 * Check if string is a Palindrome
 *
 */
@@ -82,3 +82,23 @@ let testStringB = "asdfa"
 
 println(isPalindrome(testStringA))
 println(isPalindrome(testStringB))
+
+/*
+* Friday
+* Stack Example
+*
+*/
+
+class myStack {
+  func push() {
+    
+  }
+  
+  func pop() {
+    
+  }
+  
+  func peak() {
+    
+  }
+}

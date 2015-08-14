@@ -32,7 +32,6 @@ class ViewController: UIViewController {
       imageCache.removeAll(keepCapacity: false)
       imageView.image = displayImage
       thumbnail = ImageResizer.resizeImage(displayImage!, size: kThumbnailImageSize)
-      filterMode()
       collectionView.reloadData()
     }
   }
@@ -52,6 +51,7 @@ class ViewController: UIViewController {
     picker.delegate = self
     collectionView.dataSource = self
     collectionView.delegate = self
+    displayImage = UIImage(named: "seattle.png")
     
     let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (alert) -> Void in
       
@@ -226,8 +226,12 @@ extension ViewController: UICollectionViewDelegate {
   func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
     if let image = self.displayImage {
       let filter = filters[indexPath.item]
-      let finalImage = filter(image, self.gpuContext)
-      self.imageView.image = finalImage
+      filterQueue.addOperationWithBlock({ () -> Void in
+        let finalImage = filter(image, self.gpuContext)
+        NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+          self.imageView.image = finalImage
+        })
+      })
     }
   }
 }
