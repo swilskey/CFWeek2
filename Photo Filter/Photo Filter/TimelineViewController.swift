@@ -50,8 +50,9 @@ extension TimelineViewController: UITableViewDataSource {
   func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
     
     let cell = tableView.dequeueReusableCellWithIdentifier("TimelineCell", forIndexPath: indexPath) as! TimelineCell
-    cell.tag++
+    cell.parseImagePreview.image = nil
     
+    cell.tag++
     let tag = cell.tag
 
     if let post = posts[indexPath.item] as PFObject!,
@@ -63,7 +64,6 @@ extension TimelineViewController: UITableViewDataSource {
           cell.messageLabel.text = "No Comment"
         }
         if imageCache[objectID] != nil {
-          println("From Cache")
           if cell.tag == tag {
             cell.parseImagePreview.image = imageCache[objectID]
           }

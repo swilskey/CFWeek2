@@ -12,15 +12,19 @@ import Parse
 
 class ViewController: UIViewController {
   
+  //TODO: Add a default image so that it is not blank
+  
   let kContainerViewBottomPhonePadding: CGFloat = -150
   let kThumbnailImageSize: CGSize = CGSize(width: 200, height: 200)
   let kDefaultAnimationLength: NSTimeInterval = 0.3
   
+  //MARK: Outlets
   @IBOutlet weak var imageView: UIImageView!
   @IBOutlet weak var optionButton: UIButton!
   @IBOutlet weak var collectionView: UICollectionView!
   @IBOutlet weak var collectionVerticalSpace: NSLayoutConstraint!
   
+  var imageCache = [String: UIImage]()
   let gpuContext = CIContext(EAGLContext: EAGLContext(API: EAGLRenderingAPI.OpenGLES2), options: [kCIContextWorkingColorSpace : NSNull()])
   
   var filters: [(UIImage, CIContext)-> (UIImage)] = [FilterService.sepiaImageFromOriginalImage, FilterService.pixellateImageFromOriginalImage,
@@ -91,7 +95,7 @@ class ViewController: UIViewController {
     }
     
     let galleryAction = UIAlertAction(title: "Gallery", style: .Default) { (alert) -> Void in
-      self.performSegueWithIdentifier("GallerySegue", sender: self)
+      self.performSegueWithIdentifier("ShowGallery", sender: self)
     }
     
     if UIDevice.currentDevice().userInterfaceIdiom == UIUserInterfaceIdiom.Phone {
@@ -126,6 +130,8 @@ class ViewController: UIViewController {
     self.presentViewController(actionController, animated: true, completion: nil)
   }
   
+  
+  //MARK: Helper Methods
   func filterMode() {
     UIView.animateWithDuration(kDefaultAnimationLength, animations: { () -> Void in
       self.collectionVerticalSpace.constant = 8
@@ -160,7 +166,12 @@ class ViewController: UIViewController {
   }
   
   override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-    let destination = segue.destinationViewController as! GalleryViewController
+    if segue.identifier == "ShowGallery" {
+      if let galleryViewController = segue.destinationViewController as? GalleryViewController {
+        galleryViewController.delegate = self
+        galleryViewController.desiredFinalImageSize = imageView.frame.size
+      }
+    }
   }
 }
 
@@ -176,12 +187,25 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
   }
 }
 
+//MARK: CollectionView
 extension ViewController: UICollectionViewDataSource {
   func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
     let cell = collectionView.dequeueReusableCellWithReuseIdentifier("FilterCell", forIndexPath: indexPath) as! ImageCell
+    cell.tag++
+    let tag = cell.tag
+    
+    cell.thumbnailView.image = nil
+    
+    if imageCache[String(indexPath.item)] != nil {
+      cell.thumbnailView.image = imageCache[String(indexPath.item)]
+      println("using cache")
+      return cell
+    }
+    
     if let image = thumbnail {
       let filter = filters[indexPath.item]
-      
+      let filteredImage = filter(image, self.gpuContext)
+      self.imageCache[String(indexPath.item)] = filteredImage
       cell.thumbnailView.image = filter(image, self.gpuContext)
     }
     return cell
@@ -199,5 +223,12 @@ extension ViewController: UICollectionViewDelegate {
       let finalImage = filter(image, self.gpuContext)
       self.imageView.image = finalImage
     }
+  }
+}
+
+extension ViewController : ImageSelectedDelegate {
+  func controllerDidSelectImage(newImage: UIImage) {
+    println(newImage.size)
+    displayImage = newImage
   }
 }

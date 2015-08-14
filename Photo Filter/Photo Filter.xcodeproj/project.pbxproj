@@ -10,7 +10,6 @@
 		226C844A1B7CFA3D00861FA6 /* TimelineCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 226C84491B7CFA3D00861FA6 /* TimelineCell.xib */; };
 		226C844C1B7CFAB900861FA6 /* TimelineCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226C844B1B7CFAB900861FA6 /* TimelineCell.swift */; };
 		226C844E1B7D0F5800861FA6 /* GalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226C844D1B7D0F5800861FA6 /* GalleryViewController.swift */; };
-		226C84501B7D163800861FA6 /* GalleryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226C844F1B7D163800861FA6 /* GalleryCell.swift */; };
 		22AA301A1B79185900D54982 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22AA30191B79185900D54982 /* AppDelegate.swift */; };
 		22AA301C1B79185900D54982 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22AA301B1B79185900D54982 /* ViewController.swift */; };
 		22AA301F1B79185900D54982 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 22AA301D1B79185900D54982 /* Main.storyboard */; };
@@ -53,7 +52,6 @@
 		226C84491B7CFA3D00861FA6 /* TimelineCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TimelineCell.xib; sourceTree = "<group>"; };
 		226C844B1B7CFAB900861FA6 /* TimelineCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimelineCell.swift; sourceTree = "<group>"; };
 		226C844D1B7D0F5800861FA6 /* GalleryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryViewController.swift; sourceTree = "<group>"; };
-		226C844F1B7D163800861FA6 /* GalleryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalleryCell.swift; sourceTree = "<group>"; };
 		22AA30141B79185900D54982 /* Photo Filter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Photo Filter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		22AA30181B79185900D54982 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		22AA30191B79185900D54982 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -217,7 +215,6 @@
 				22FC55431B7BCE4E00B1CC4D /* ImageCell.swift */,
 				226C84491B7CFA3D00861FA6 /* TimelineCell.xib */,
 				226C844B1B7CFAB900861FA6 /* TimelineCell.swift */,
-				226C844F1B7D163800861FA6 /* GalleryCell.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -347,7 +344,6 @@
 				22AA301C1B79185900D54982 /* ViewController.swift in Sources */,
 				226C844C1B7CFAB900861FA6 /* TimelineCell.swift in Sources */,
 				22AA301A1B79185900D54982 /* AppDelegate.swift in Sources */,
-				226C84501B7D163800861FA6 /* GalleryCell.swift in Sources */,
 				226C844E1B7D0F5800861FA6 /* GalleryViewController.swift in Sources */,
 				22F9C9F61B7AC918005F3479 /* TimelineViewController.swift in Sources */,
 				22FC55441B7BCE4E00B1CC4D /* ImageCell.swift in Sources */,

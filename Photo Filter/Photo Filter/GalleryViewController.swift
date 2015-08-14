@@ -7,83 +7,70 @@
 //
 
 import UIKit
-import Bolts
-import Parse
+import Photos
+
+protocol ImageSelectedDelegate: class {
+  func controllerDidSelectImage(UIImage) -> (Void)
+}
 
 class GalleryViewController: UIViewController {
   @IBOutlet weak var galleryCollectionView: UICollectionView!
   
+  weak var delegate: ImageSelectedDelegate?
   
-  var posts = [PFObject]()
-  var imageCache = [String: UIImage]()
+  var fetchResult: PHFetchResult!
+  var desiredFinalImageSize : CGSize!
+  let cellThumbnailSize = CGSize(width:100, height: 100)
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    navigationController?.navigationBarHidden = false
     galleryCollectionView.dataSource = self
+    galleryCollectionView.delegate = self
+    navigationController?.navigationBarHidden = false
+    fetchResult = PHAsset.fetchAssetsWithMediaType(PHAssetMediaType.Image, options: nil)
     
-    let query = PFQuery(className: "Post")
-    
-    query.findObjectsInBackgroundWithBlock { (results, error) -> Void in
-      if let error = error {
-        println(error.localizedDescription)
-      } else if let posts = results as? [PFObject] {
-        NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
-          self.posts = posts
-          println(posts.count)
-          self.galleryCollectionView.reloadData()
-        })
-      }
-    }
-    // Do any additional setup after loading the view.
   }
   
   override func didReceiveMemoryWarning() {
     super.didReceiveMemoryWarning()
-    // Dispose of any resources that can be recreated.
   }
-  
 }
 
 extension GalleryViewController: UICollectionViewDataSource {
   
   func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-    let cell = collectionView.dequeueReusableCellWithReuseIdentifier("ImageCell", forIndexPath: indexPath) as! GalleryCell
-    
-    cell.tag++
-    
-    let tag = cell.tag
-    
-    if let post = posts[indexPath.item] as PFObject!,
-      imageFile = post["image"] as? PFFile,
-      objectID = post.objectId {
-        if imageCache[objectID] != nil {
-          println("From Cache")
-          if cell.tag == tag {
-            cell.galleryImage.image = imageCache[objectID]
-          }
-        } else {
-          imageFile.getDataInBackgroundWithBlock({ (data, error) -> Void in
-            if let error = error {
-              println(error.localizedDescription)
-            } else if let data = data,
-              image = UIImage(data: data) {
-                NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
-                  let finalImage = ImageResizer.resizeImage(image, size: CGSize(width: 400, height: 400))
-                  if cell.tag == tag {
-                    self.imageCache[objectID] = image
-                    cell.galleryImage.image = image
-                  }
-                })
-            }
-          })
-        }
+    let cell = collectionView.dequeueReusableCellWithReuseIdentifier("ImageCell", forIndexPath: indexPath) as! ImageCell
+    if let asset = fetchResult[indexPath.row] as? PHAsset {
+      PHCachingImageManager.defaultManager().requestImageForAsset(asset, targetSize: cellThumbnailSize, contentMode: PHImageContentMode.AspectFill, options: nil) { (image, info) -> Void in
+        cell.thumbnailView.image = image
+      }
     }
-
     return cell
   }
   
   func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    return posts.count
+    return fetchResult.count
+  }
+}
+
+extension GalleryViewController: UICollectionViewDelegate {
+  func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+    let options = PHImageRequestOptions()
+    options.synchronous = true
+    let backgroundQueue = NSOperationQueue()
+    backgroundQueue.addOperationWithBlock { () -> Void in
+      if let asset = self.fetchResult[indexPath.row] as? PHAsset {
+        PHCachingImageManager.defaultManager().requestImageForAsset(asset, targetSize: self.desiredFinalImageSize, contentMode: PHImageContentMode.AspectFill, options: options) { (image, info) -> Void in
+          
+          if let image = image {
+
+            NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+              self.delegate?.controllerDidSelectImage(image)              
+              self.navigationController?.popViewControllerAnimated(true)
+            })
+          }
+        }
+      }
+    }
   }
 }

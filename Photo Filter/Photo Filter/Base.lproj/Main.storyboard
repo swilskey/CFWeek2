@@ -39,7 +39,7 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="106" id="7MI-wu-6Wu"/>
                                 </constraints>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="DbA-rI-Run">
+                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="DbA-rI-Run">
                                     <size key="itemSize" width="106" height="106"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
@@ -110,7 +110,7 @@
                         <outlet property="collectionView" destination="6Bd-xz-9Qe" id="kR7-9U-gh7"/>
                         <outlet property="imageView" destination="E1K-cj-mh4" id="b8D-4E-dqu"/>
                         <outlet property="optionButton" destination="bq9-bz-jZ1" id="pt2-qR-X3s"/>
-                        <segue destination="Ckd-lB-pO8" kind="show" identifier="GallerySegue" id="jXg-am-tPo"/>
+                        <segue destination="Ckd-lB-pO8" kind="show" identifier="ShowGallery" id="jXg-am-tPo"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -129,24 +129,25 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="e6f-w9-aUB">
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="e6f-w9-aUB">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="Ccx-Ta-bEh">
-                                    <size key="itemSize" width="50" height="50"/>
+                                    <size key="itemSize" width="100" height="100"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                    <inset key="sectionInset" minX="8" minY="0.0" maxX="8" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="ImageCell" id="3Jz-ZA-DsS" customClass="GalleryCell" customModule="Photo_Filter" customModuleProvider="target">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="ImageCell" id="3Jz-ZA-DsS" customClass="ImageCell" customModule="Photo_Filter" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="200" height="200"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xfe-js-wWP">
-                                                    <rect key="frame" x="0.0" y="0.0" width="200" height="200"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                 </imageView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
@@ -157,9 +158,9 @@
                                             <constraint firstAttribute="trailingMargin" secondItem="xfe-js-wWP" secondAttribute="trailing" constant="-8" id="vz6-Tu-S8H"/>
                                             <constraint firstItem="xfe-js-wWP" firstAttribute="top" secondItem="3Jz-ZA-DsS" secondAttribute="topMargin" constant="-8" id="wTQ-3Q-e3c"/>
                                         </constraints>
-                                        <size key="customSize" width="200" height="200"/>
+                                        <size key="customSize" width="100" height="100"/>
                                         <connections>
-                                            <outlet property="galleryImage" destination="xfe-js-wWP" id="7gW-w0-lXj"/>
+                                            <outlet property="thumbnailView" destination="xfe-js-wWP" id="Sex-CM-27B"/>
                                         </connections>
                                     </collectionViewCell>
                                 </cells>
@@ -167,6 +168,12 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
+                        <constraints>
+                            <constraint firstItem="e6f-w9-aUB" firstAttribute="bottom" secondItem="72p-Rd-Ybj" secondAttribute="bottomMargin" id="7mK-oW-8Uj"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="e6f-w9-aUB" secondAttribute="trailing" constant="-16" id="YUH-7J-3bb"/>
+                            <constraint firstItem="e6f-w9-aUB" firstAttribute="top" secondItem="72p-Rd-Ybj" secondAttribute="topMargin" id="drS-8S-SxA"/>
+                            <constraint firstItem="e6f-w9-aUB" firstAttribute="leading" secondItem="72p-Rd-Ybj" secondAttribute="leadingMargin" constant="-16" id="p6d-f1-gic"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="galleryCollectionView" destination="e6f-w9-aUB" id="HUt-YG-7eR"/>
