@@ -89,16 +89,27 @@ println(isPalindrome(testStringB))
 *
 */
 
-class myStack {
-  func push() {
-    
+class MyStack {
+  var stack = [Int]()
+  func push(new: Int) {
+    stack.append(new)
   }
   
-  func pop() {
-    
+  func pop() -> Int {
+    let number = stack[stack.count - 1]
+    stack.removeAtIndex(stack.count - 1)
+    return number
   }
   
   func peak() {
-    
+    println(stack[stack.count - 1])
   }
 }
+
+var testStack = MyStack()
+
+testStack.push(30)
+testStack.push(45)
+testStack.peak()
+testStack.pop()
+testStack.peak()
